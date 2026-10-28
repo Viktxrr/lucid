@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lucid · Support &amp; Privacy</title>
+<meta name="description" content="Support, FAQ and Privacy Policy for Lucid, the offline music player for iPhone.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/icon-v3.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  /* Same tokens as index.html: the two pages are one site. */
+  :root {
+    --sc-canvas:     #0c0a0b;
+    --sc-surface:    #1c1a1c;
+    --sc-ink:        #f3eef0;
+    --sc-ink-soft:   #aaa0a5;
+    --sc-accent:     #e8697a;
+    --sc-accent-ink: #1d0b0f;
+    --sc-font-display: -apple-system, "SF Pro Display", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --sc-font-text:    -apple-system, "SF Pro Text", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --sc-font-mono:    "SF Mono", ui-monospace, Menlo, monospace;
+    --sc-shadow-color: 330 20% 2%;
+    --folder:      #151517;
+    --folder-ink-soft: #a3a4ab;
+    --lucid:       #0c0a0b;
+  }
+  html[data-lang="de"] [lang="en"], html[data-lang="en"] [lang="de"] { display: none !important; }
+  body { background: linear-gradient(90deg, var(--folder) 50%, var(--lucid) 50%); }
+
+  /* ------------------------------------------- the divider, as on index -- */
+  .divider { position: fixed; inset-block: 0; left: 50%; width: 0; z-index: 60; pointer-events: none; }
+  .divider__line { position: absolute; inset-block: 0; left: -0.5px; width: 1px; background: var(--sc-hairline-strong); }
+  .divider__dot { position: absolute; left: -4px; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--sc-accent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--sc-accent) 18%, transparent); will-change: transform; }
+  .divider__labels { position: absolute; top: var(--sc-5); left: 0; display: flex; gap: var(--sc-6); translate: -50% 0; white-space: nowrap; pointer-events: auto; }
+  .divider__labels a { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide); text-transform: uppercase; text-decoration: none; width: 12rem; }
+  .divider__labels a:first-child { color: var(--folder-ink-soft); text-align: right; }
+  .divider__labels a:last-child { color: var(--sc-accent); }
+  .divider__cta { position: absolute; bottom: var(--sc-5); left: var(--sc-5); white-space: nowrap; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); margin: 0; }
+  .divider__cta b { color: var(--sc-ink); font-weight: 600; }
+
+  /* corner chrome: home and language */
+  .corner { position: fixed; top: var(--sc-4); z-index: 61; display: flex; align-items: center; gap: var(--sc-3); }
+  .corner--l { left: clamp(1.5rem, 4.5vw, 5rem); }
+  .corner--r { right: clamp(1.5rem, 4.5vw, 5rem); }
+  .home { display: flex; align-items: center; gap: var(--sc-3); text-decoration: none; font-weight: 600; letter-spacing: var(--sc-track-snug); }
+  .home img { width: 2rem; height: 2rem; border-radius: 22.5%; box-shadow: var(--sc-e2); }
+  .lang { padding: 0.35rem 0.6rem; border-radius: var(--sc-r-sm); border: 1px solid var(--sc-hairline-strong); background: color-mix(in oklab, var(--lucid) 80%, transparent);
+    font: 600 var(--sc-t-xs) var(--sc-font-mono); letter-spacing: var(--sc-track-wide); cursor: pointer; transition: background-color var(--sc-d-fast) var(--sc-ease-out); }
+  @media (hover: hover) and (pointer: fine) { .lang:hover { background: rgba(255,255,255,.08); } }
+  .lang:active { transform: scale(0.97); }
+
+  /* ---------------------------------------------------- split scaffold -- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; }
+  .half { position: relative; padding: var(--sc-section) clamp(1.5rem, 4.5vw, 5rem); }
+  .half--l { background: var(--folder); }
+  .half--l .sc-body, .half--l .lbl { color: var(--folder-ink-soft); }
+  .lbl { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide); text-transform: uppercase; margin: 0 0 var(--sc-4); }
+  .half--r .lbl { color: var(--sc-accent); }
+  .sticky { position: sticky; top: 7rem; }
+  .sc-display { font-size: var(--sc-t-2xl); }
+  .sc-body { margin-top: var(--sc-4); }
+  section + section { border-top: 1px solid var(--sc-hairline); }
+
+  .hero .half { min-height: 78svh; display: flex; flex-direction: column; justify-content: flex-end; }
+  .hero .sc-display { font-size: var(--sc-t-3xl); max-width: 12ch; }
+  .hero .sc-body { max-width: 30ch; }
+  .jump { margin-top: var(--sc-6); }
+  .badge, .ghost {
+    display: inline-flex; align-items: center; gap: var(--sc-2); padding: 0.8rem 1.3rem; border-radius: var(--sc-r-md);
+    font-weight: 600; text-decoration: none; white-space: nowrap;
+    transition: filter var(--sc-d-fast) var(--sc-ease-out), background-color var(--sc-d-fast) var(--sc-ease-out), transform 120ms var(--sc-ease-out);
+  }
+  .badge { background: var(--sc-accent); color: var(--sc-accent-ink); }
+  .ghost { border: 1px solid var(--sc-hairline-strong); }
+  @media (hover: hover) and (pointer: fine) { .badge:hover { filter: brightness(1.08); } .ghost:hover { background: rgba(255,255,255,.05); } }
+  .badge:active, .ghost:active { transform: scale(0.97); }
+
+  .content { max-width: 40rem; }
+
+  /* faq: hairline rows, like the file lists on index */
+  details { border-top: 1px solid color-mix(in oklab, var(--sc-ink) 8%, transparent); }
+  details:last-of-type { border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 8%, transparent); }
+  summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
+    padding: var(--sc-4) 0; font-weight: 600; font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: ""; flex: none; width: 0.55rem; height: 0.55rem; border-right: 1.5px solid var(--sc-ink-soft); border-bottom: 1.5px solid var(--sc-ink-soft);
+    rotate: 45deg; translate: 0 -0.15rem; transition: rotate 200ms var(--sc-ease-out), translate 200ms var(--sc-ease-out); }
+  details[open] summary::after { rotate: 225deg; translate: 0 0.15rem; border-color: var(--sc-accent); }
+  details > :not(summary) { margin: 0 0 var(--sc-5); color: var(--sc-ink-soft); max-width: 62ch; }
+  details ol { padding-left: 1.2rem; display: grid; gap: var(--sc-2); }
+  details li::marker { color: var(--sc-accent); font-family: var(--sc-font-mono); font-size: 0.85em; }
+
+  .contact { margin-top: var(--sc-7); padding: var(--sc-6); border-radius: var(--sc-r-lg); background: var(--sc-surface); box-shadow: var(--sc-e2), var(--sc-edge);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sc-5); }
+  .contact h3 { margin: 0; font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); line-height: 1.2; }
+  .contact p { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); max-width: 38ch; }
+
+  /* privacy */
+  .tldr { padding: var(--sc-6); border-radius: var(--sc-r-lg); border: 1px solid color-mix(in oklab, var(--sc-accent) 35%, transparent);
+    background: color-mix(in oklab, var(--sc-accent) 7%, var(--lucid)); margin-bottom: var(--sc-7); }
+  .tldr h3 { margin: 0; font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); }
+  .tldr ul { list-style: none; margin: var(--sc-4) 0 0; padding: 0; display: grid; gap: var(--sc-2); }
+  .tldr li { display: flex; gap: var(--sc-3); }
+  .tldr li::before { content: ""; flex: none; width: 0.8rem; height: 0.42rem; margin-top: 0.5rem; border-left: 2px solid var(--sc-accent); border-bottom: 2px solid var(--sc-accent); rotate: -45deg; }
+  .clause { display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 var(--sc-2); padding-block: var(--sc-5); border-top: 1px solid color-mix(in oklab, var(--sc-ink) 8%, transparent); }
+  .clause .lbl { padding-top: 0.3rem; margin: 0; }
+  .clause h3 { margin: 0 0 var(--sc-2); font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); line-height: 1.2; }
+  .clause p, .clause ul { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); }
+  .clause ul { padding-left: 1.1rem; }
+  .clause strong { color: var(--sc-ink); font-weight: 600; }
+  .clause a { color: var(--sc-accent); }
+  .updated { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide); text-transform: uppercase; color: var(--folder-ink-soft); margin-top: var(--sc-4); }
+
+  /* foot: as the close of index */
+  .foot { border-top: 1px solid var(--sc-hairline); }
+  .foot .half { padding-block: var(--sc-5); font-size: var(--sc-t-xs); color: var(--sc-ink-soft); display: flex; gap: var(--sc-5); }
+  .foot .half--r { justify-content: flex-end; }
+  .foot a { color: var(--sc-ink); text-decoration: none; }
+  @media (hover: hover) and (pointer: fine) { .foot a:hover { color: var(--sc-accent); } }
+
+  @media (max-width: 859px) {
+    body { background: var(--lucid); }
+    .divider { display: none; }
+    .corner { position: absolute; }
+    .split { grid-template-columns: 1fr; }
+    .half { padding: var(--sc-7) var(--sc-5); }
+    .hero .half { min-height: 0; }
+    .hero .half--l { padding-top: 6rem; }
+    .sticky { position: static; }
+    .foot .half--r { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="sc-grain" aria-hidden="true"></div>
+<script>
+  // Only edit these values: used everywhere on the page.
+  const CONFIG = { appName: 'Lucid', email: 'lucid.app.support@proton.me', lastUpdated: '2026-10-11' };
+</script>
+
+<div class="corner corner--l"><a class="home" href="index.html"><img src="assets/icon-v3.png" alt="" width="32" height="32"><span data-app-name></span></a></div>
+<div class="corner corner--r"><button id="lang" class="lang" type="button" aria-label="Switch language">EN</button></div>
+
+<div class="divider" aria-hidden="true">
+  <div class="divider__line"></div>
+  <div class="divider__dot"></div>
+  <div class="divider__labels"><a href="#support" tabindex="-1">Support</a><a href="#privacy" tabindex="-1"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></a></div>
+</div>
+
+<main id="top">
+  <section class="hero">
+    <div class="split">
+      <div class="half half--l">
+        <p class="lbl">Support</p>
+        <h1 class="sc-display"><span lang="de">Hilfe zu Lucid.</span><span lang="en">Help with Lucid.</span></h1>
+        <p class="sc-body"><span lang="de">Die häufigsten Fragen, kurz beantwortet.</span><span lang="en">The most common questions, answered.</span></p>
+        <p class="jump"><a class="ghost" href="#support">Support &amp; FAQ</a></p>
+      </div>
+      <div class="half half--r">
+        <p class="lbl"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></p>
+        <h2 class="sc-display"><span lang="de">Deine Daten bleiben bei dir.</span><span lang="en">Your data stays with you.</span></h2>
+        <p class="sc-body"><span lang="de">Kein Konto, kein Tracking, keine Server. Alles bleibt auf deinem iPhone.</span><span lang="en">No account, no tracking, no servers. Everything stays on your iPhone.</span></p>
+        <p class="jump"><a class="badge" href="#privacy"><span lang="de">Datenschutzerklärung</span><span lang="en">Privacy Policy</span></a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="support" style="scroll-margin-top:0">
+    <div class="split">
+      <div class="half half--l">
+        <div class="sticky">
+          <p class="lbl">Support</p>
+          <h2 class="sc-display">FAQ</h2>
+          <p class="sc-body"><span lang="de">Alles Wichtige zu Import, Offline-Nutzung und deinen Daten.</span><span lang="en">Everything about importing, offline use and your data.</span></p>
+        </div>
+      </div>
+      <div class="half half--r">
+        <div class="content">
+          <details open>
+            <summary><span lang="de">Was ist <span data-app-name></span>?</span><span lang="en">What is <span data-app-name></span>?</span></summary>
+            <p><span lang="de">Ein Offline-Musikplayer für deine eigenen Audio-Dateien, mit Playlists, Songtexten, Crossfade und Hörstatistiken. Die App funktioniert vollständig ohne Internet. Sie bringt keine Musik und keine Online-Dienste mit.</span><span lang="en">An offline music player for your own audio files, with playlists, lyrics, crossfade and listening stats. The app works entirely without internet. It ships with no music and no online services.</span></p>
+          </details>
+          <details>
+            <summary><span lang="de">Wie füge ich Musik hinzu?</span><span lang="en">How do I add music?</span></summary>
+            <ol>
+              <li><span lang="de">Lege deine Audio-Dateien (z. B. MP3, M4A, FLAC, WAV) in die Dateien-App: auf dem iPhone, in iCloud Drive oder einem anderen Speicherort.</span><span lang="en">Put your audio files (e.g. MP3, M4A, FLAC, WAV) into the Files app: on your iPhone, in iCloud Drive or another location.</span></li>
+              <li><span lang="de">Tippe in der leeren Mediathek auf „Audio-Dateien importieren“ oder in den Einstellungen auf „Musik importieren“.</span><span lang="en">Tap “Import Audio Files” in the empty library, or “Import Music” in Settings.</span></li>
+              <li><span lang="de">Wähle Dateien oder einen ganzen Ordner aus. Titel, Künstler und eingebettete Cover werden automatisch gelesen und unordentliche Namen bereinigt.</span><span lang="en">Pick files or a whole folder. Title, artist and embedded artwork are read automatically, and messy names are cleaned up.</span></li>
+            </ol>
+          </details>
+          <details>
+            <summary><span lang="de">Funktioniert die App ohne Internet?</span><span lang="en">Does the app work offline?</span></summary>
+            <p><span lang="de">Ja. Die App braucht keine Internetverbindung. Musik, Cover, Songtexte, Playlists und Statistiken liegen vollständig auf deinem iPhone.</span><span lang="en">Yes. The app needs no internet connection. Music, artwork, lyrics, playlists and stats all live on your iPhone.</span></p>
+          </details>
+          <details>
+            <summary><span lang="de">Warum fehlen Cover oder Songtexte?</span><span lang="en">Why is artwork or are lyrics missing?</span></summary>
+            <p><span lang="de">Die App zeigt die Cover, die in deine Dateien eingebettet sind. Du kannst jederzeit eigene Bilder (Fotos/Dateien) oder Songtexte (.lrc/.txt) über „Cover ändern“ bzw. „Songtext ändern“ hinzufügen.</span><span lang="en">The app shows the artwork embedded in your files. You can always add your own images (Photos/Files) or lyrics (.lrc/.txt) via “Change Artwork” or “Change Lyrics”.</span></p>
+          </details>
+          <details>
+            <summary><span lang="de">Wie lösche ich meine Daten?</span><span lang="en">How do I delete my data?</span></summary>
+            <p><span lang="de">Alle Daten liegen ausschließlich auf deinem Gerät. Einzelne Songs, Cover und Songtexte kannst du in der App löschen (Einstellungen → Speicher). Wenn du die App deinstallierst, werden alle Daten vollständig entfernt.</span><span lang="en">All data is stored only on your device. You can delete individual songs, artwork and lyrics in the app (Settings → Storage). Uninstalling the app removes all data completely.</span></p>
+          </details>
+
+          <div class="contact">
+            <div>
+              <h3><span lang="de">Fehler gefunden oder technische Probleme?</span><span lang="en">Found a bug or experiencing technical issues?</span></h3>
+              <p><span lang="de">Melde es hier. Bitte nur für Fehlermeldungen und kritische technische Probleme.</span><span lang="en">Report it here. For bug reports and critical technical issues only.</span></p>
+            </div>
+            <a class="badge" data-email-link><span data-email></span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="split">
+      <div class="half half--l">
+        <div class="sticky">
+          <p class="lbl"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></p>
+          <h2 class="sc-display"><span lang="de">Datenschutz&shy;erklärung</span><span lang="en">Privacy Policy</span></h2>
+          <p class="updated"><span lang="de">Stand:</span><span lang="en">Last updated:</span> <span data-updated></span></p>
+        </div>
+      </div>
+      <div class="half half--r">
+        <div class="content">
+          <div class="tldr">
+            <h3><span lang="de">Kurz gesagt: Wir sammeln keine Daten.</span><span lang="en">In short: we collect no data.</span></h3>
+            <ul>
+              <li><span lang="de">100 % lokale Verarbeitung auf deinem Gerät</span><span lang="en">100% local processing on your device</span></li>
+              <li><span lang="de">Kein Konto, keine Anmeldung</span><span lang="en">No account, no sign-in</span></li>
+              <li><span lang="de">Kein Tracking, keine Analyse, keine Werbung</span><span lang="en">No tracking, no analytics, no ads</span></li>
+              <li><span lang="de">Keine eigenen Server, wir erhalten nichts</span><span lang="en">No servers of our own, we receive nothing</span></li>
+            </ul>
+          </div>
+
+          <article class="clause"><p class="lbl">01</p><div>
+            <h3><span lang="de">Verantwortlicher</span><span lang="en">Controller</span></h3>
+            <p><span lang="de">Verantwortlich für die App <span data-app-name></span> ist der Entwickler, siehe <a href="#support">Support</a>.</span><span lang="en">The app <span data-app-name></span> is provided by its developer, see <a href="#support">Support</a>.</span></p>
+          </div></article>
+          <article class="clause"><p class="lbl">02</p><div>
+            <h3><span lang="de">Keine Datenerhebung durch uns</span><span lang="en">No data collection by us</span></h3>
+            <p><span lang="de">Die App arbeitet vollständig lokal. Wir betreiben keine Server für die App und erhalten, speichern oder verarbeiten keinerlei personenbezogene Daten. Die App stellt keine Verbindungen ins Internet her. Es sind keine Analyse-, Tracking- oder Werbe-Dienste (SDKs) eingebunden. Die App verfolgt dich weder app- noch webseitenübergreifend.</span><span lang="en">The app works entirely locally. We operate no servers for the app and do not receive, store or process any personal data. The app makes no internet connections. No analytics, tracking or advertising services (SDKs) are included. The app does not track you across apps or websites.</span></p>
+          </div></article>
+          <article class="clause"><p class="lbl">03</p><div>
+            <h3><span lang="de">Daten auf deinem Gerät</span><span lang="en">Data on your device</span></h3>
+            <p><span lang="de">Folgende Daten werden ausschließlich lokal auf deinem iPhone gespeichert und verlassen es nicht:</span><span lang="en">The following data is stored only locally on your iPhone and never leaves it:</span></p>
+            <ul>
+              <li><span lang="de">Importierte Audio-Dateien, Cover-Bilder und Songtexte</span><span lang="en">Imported audio files, artwork and lyrics</span></li>
+              <li><span lang="de">Mediathek, Playlists und Einstellungen (lokale Datenbank)</span><span lang="en">Library, playlists and settings (local database)</span></li>
+              <li><span lang="de">Hörstatistiken (z. B. Wiedergabezeit), nur für die Anzeige in der App</span><span lang="en">Listening stats (e.g. play time), only for display in the app</span></li>
+            </ul>
+            <p><span lang="de">Durch Löschen der App werden alle diese Daten entfernt.</span><span lang="en">Deleting the app removes all of this data.</span></p>
+          </div></article>
+          <article class="clause"><p class="lbl">04</p><div>
+            <h3><span lang="de">Berechtigungen</span><span lang="en">Permissions</span></h3>
+            <ul>
+              <li><strong><span lang="de">Fotos:</span><span lang="en">Photos:</span></strong> <span lang="de">nur für Bilder, die du selbst auswählst (eigene Cover, Künstler- oder Playlist-Bilder).</span><span lang="en">only for images you pick yourself (custom artwork, artist or playlist images).</span></li>
+              <li><strong><span lang="de">Dateien:</span><span lang="en">Files:</span></strong> <span lang="de">nur für Dateien und Ordner, die du im System-Dialog auswählst.</span><span lang="en">only for files and folders you choose in the system picker.</span></li>
+            </ul>
+            <p><span lang="de">Mikrofon, Kamera, Standort und Kontakte werden nicht verwendet.</span><span lang="en">Microphone, camera, location and contacts are not used.</span></p>
+          </div></article>
+          <article class="clause"><p class="lbl">05</p><div>
+            <h3><span lang="de">Kinder</span><span lang="en">Children</span></h3>
+            <p><span lang="de">Da wir keine Daten erheben, werden auch keine Daten von Kindern erhoben.</span><span lang="en">As we collect no data, we also collect no data from children.</span></p>
+          </div></article>
+          <article class="clause"><p class="lbl">06</p><div>
+            <h3><span lang="de">Deine Rechte</span><span lang="en">Your rights</span></h3>
+            <p><span lang="de">Da wir keine personenbezogenen Daten verarbeiten, liegen uns keine Daten über dich vor, die wir beauskunften, berichtigen oder löschen könnten.</span><span lang="en">As we process no personal data, we hold no data about you that could be disclosed, corrected or deleted.</span></p>
+          </div></article>
+          <article class="clause"><p class="lbl">07</p><div>
+            <h3><span lang="de">Änderungen</span><span lang="en">Changes</span></h3>
+            <p><span lang="de">Ändert sich die Funktionsweise der App, passen wir diese Erklärung an. Das Datum oben zeigt die aktuelle Fassung.</span><span lang="en">If the way the app works changes, we will update this policy. The date above shows the current version.</span></p>
+          </div></article>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="split">
+    <div class="half half--l"><span>© <span id="year"></span> <span data-app-name></span></span></div>
+    <div class="half half--r">
+      <a href="index.html"><span lang="de">Startseite</span><span lang="en">Home</span></a>
+      <a href="#support">Support</a>
+      <a href="#privacy"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('[data-app-name]').forEach((el) => (el.textContent = CONFIG.appName));
+  document.querySelectorAll('[data-email]').forEach((el) => (el.textContent = CONFIG.email));
+  document.querySelectorAll('[data-email-link]').forEach((el) => (el.href = 'mailto:' + CONFIG.email));
+  document.querySelectorAll('[data-updated]').forEach((el) => (el.textContent = CONFIG.lastUpdated));
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Language: ?lang=en / ?lang=de, else the browser language.
+  const root = document.documentElement;
+  const btn = document.getElementById('lang');
+  const setLang = (lang) => { root.dataset.lang = lang; root.lang = lang; btn.textContent = lang === 'de' ? 'EN' : 'DE'; };
+  const param = new URLSearchParams(location.search).get('lang');
+  setLang(param === 'en' || param === 'de' ? param : navigator.language.startsWith('de') ? 'de' : 'en');
+  btn.addEventListener('click', () => setLang(root.dataset.lang === 'de' ? 'en' : 'de'));
+
+  // The divider's progress dot, exactly as on the landing page.
+  const dot = document.querySelector('.divider__dot');
+  const paint = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    dot.style.transform = `translateY(${(max > 0 ? Math.min(1, scrollY / max) : 0) * (innerHeight - 8)}px)`;
+  };
+  addEventListener('scroll', paint, { passive: true });
+  addEventListener('resize', paint);
+  paint();
+</script>
+</body>
+</html>

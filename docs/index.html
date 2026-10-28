@@ -1,307 +1,540 @@
 <!doctype html>
-<html lang="de" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Support &amp; Privacy</title>
-  <meta name="description" content="Support, FAQ and Privacy Policy" />
-  <meta name="color-scheme" content="dark" />
-  <link rel="icon" type="image/png" href="icon.png" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"Segoe UI"', 'Inter', 'Roboto', 'sans-serif'],
-          },
-          colors: { accent: '#FA5C7A' },
-        },
-      },
-    };
-  </script>
-  <style>
-    body { background: #000; }
-    /* Soft ambient glow behind everything */
-    .orb { position: fixed; border-radius: 9999px; filter: blur(90px); opacity: .28; pointer-events: none; z-index: 0; }
-    /* Liquid-glass surface */
-    .glass {
-      background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-      backdrop-filter: blur(24px) saturate(160%);
-      -webkit-backdrop-filter: blur(24px) saturate(160%);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    /* iOS app-icon shape (continuous-corner approximation) */
-    .app-icon { border-radius: 22.5%; overflow: hidden; }
-    details > summary { list-style: none; cursor: pointer; }
-    details > summary::-webkit-details-marker { display: none; }
-    details[open] .chev { transform: rotate(90deg); }
-    /* Language switch: only the active language is visible */
-    html[data-lang="de"] [lang="en"], html[data-lang="en"] [lang="de"] { display: none !important; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lucid · your music, in order</title>
+<meta name="description" content="Lucid is an offline music player for iPhone. It imports your own audio files and cleans up messy names and tags. No account, no tracking.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/icon-v3.png">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  :root {
+    --sc-canvas:     #0c0a0b;
+    --sc-surface:    #1c1a1c;
+    --sc-ink:        #f3eef0;
+    --sc-ink-soft:   #aaa0a5;
+    --sc-accent:     #e8697a;
+    --sc-accent-ink: #1d0b0f;
+    --sc-font-display: -apple-system, "SF Pro Display", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --sc-font-text:    -apple-system, "SF Pro Text", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --sc-font-mono:    "SF Mono", ui-monospace, Menlo, monospace;
+    --sc-shadow-color: 330 20% 2%;
+    /* the two grounds of the split. They hold for the whole page. */
+    --folder:      #151517;
+    --folder-ink-soft: #a3a4ab;
+    --lucid:       #0c0a0b;
+  }
+  body { background: linear-gradient(90deg, var(--folder) 50%, var(--lucid) 50%); }
+
+  /* ------------------------------------------------ the divider (chrome) -- */
+  .divider {
+    position: fixed; inset-block: 0; left: 50%; width: 0; z-index: 60;
+    pointer-events: none;
+  }
+  .divider__line { position: absolute; inset-block: 0; left: -0.5px; width: 1px; background: var(--sc-hairline-strong); }
+  .divider__dot {
+    position: absolute; left: -4px; top: 0; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--sc-accent); box-shadow: 0 0 0 4px color-mix(in oklab, var(--sc-accent) 18%, transparent);
+    will-change: transform;
+  }
+  .divider__labels {
+    position: absolute; top: var(--sc-5); left: 0; display: flex; gap: var(--sc-6);
+    translate: -50% 0; white-space: nowrap;
+  }
+  .divider__labels span { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide); text-transform: uppercase; }
+  .divider__labels span:first-child { color: var(--folder-ink-soft); text-align: right; width: 12rem; }
+  .divider__labels span:last-child { color: var(--sc-accent); width: 12rem; }
+  .divider__cta {
+    position: absolute; bottom: var(--sc-5); left: var(--sc-5); white-space: nowrap;
+    font-size: var(--sc-t-sm); color: var(--sc-ink-soft);
+  }
+  .divider__cta b { color: var(--sc-ink); font-weight: 600; }
+
+  /* --------------------------------------------------- split scaffolding -- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+  .half { position: relative; overflow: clip; display: flex; flex-direction: column; justify-content: center; padding: var(--sc-9) clamp(1.5rem, 4.5vw, 5rem); }
+  .half--l { background: var(--folder); }
+  .half--r { background: var(--lucid); }
+  .half--l .sc-body, .half--l .lbl { color: var(--folder-ink-soft); }
+  .lbl { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide); text-transform: uppercase; margin: 0 0 var(--sc-4); }
+  .half--r .lbl { color: var(--sc-accent); }
+
+  /* file names: monospace is the real idiom here, they are file names */
+  .files { list-style: none; margin: 0; padding: 0; font-family: var(--sc-font-mono); font-size: clamp(0.78rem, 0.6rem + 0.45vw, 1rem); line-height: 1.5; }
+  .files li { display: flex; gap: var(--sc-3); align-items: baseline; padding: var(--sc-2) 0; border-top: 1px solid color-mix(in oklab, var(--sc-ink) 8%, transparent); color: #d9d6dc; }
+  .files li::before { content: ""; flex: none; width: 0.7em; height: 0.85em; border-radius: 2px; background: color-mix(in oklab, var(--sc-ink) 22%, transparent); translate: 0 0.1em; }
+  .files .tag { margin-left: auto; padding-left: var(--sc-3); color: #8f8f98; white-space: nowrap; }
+
+  /* phone frame around real recordings and screenshots */
+  .phone {
+    position: relative; aspect-ratio: 1320 / 2868; height: min(70svh, 44rem);
+    border-radius: 2.6rem; padding: 0.55rem; background: #1b191b;
+    box-shadow: var(--sc-e3), var(--sc-edge), 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .phone > .screen { position: relative; width: 100%; height: 100%; border-radius: 2.1rem; overflow: clip; background: #000; }
+  .phone > .screen > img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ----------------------------------------------------------------- hero -- */
+  .hero .half--l { justify-content: flex-end; }
+  .hero__ghost {
+    position: absolute; inset: -10% -20% auto -5%; font-family: var(--sc-font-mono);
+    font-size: clamp(0.9rem, 0.7rem + 0.6vw, 1.3rem); line-height: 1.9; color: rgba(255,255,255,.07);
+    filter: blur(1.5px); white-space: nowrap; pointer-events: none; user-select: none;
+  }
+  .hero__lead { position: relative; z-index: 2; }
+  .hero__lead .sc-display { font-size: var(--sc-t-2xl); margin-bottom: var(--sc-6); max-width: 14ch; }
+  .hero .half--r { align-items: center; justify-content: center; }
+  .scene { position: relative; display: grid; place-items: center; width: 100%; height: 100%; }
+  .scene__glow { position: absolute; width: 85%; aspect-ratio: 1; border-radius: 50%; filter: blur(90px) saturate(1.2); opacity: .42; }
+  .scene__glow img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .scene__cover { position: absolute; width: clamp(7rem, 12vw, 11rem); aspect-ratio: 1; border-radius: 14px; box-shadow: var(--sc-e3); max-width: none; }
+  .scene__cover img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+  .scene__cover--a { top: 14%; left: 8%; rotate: -8deg; filter: blur(1.2px) brightness(.8); scale: .85; }
+  .scene__cover--b { top: 20%; right: 6%; rotate: 7deg; filter: blur(.8px) brightness(.85); scale: .9; }
+  .scene__cover--near { bottom: 9%; left: 14%; rotate: -4deg; width: clamp(8rem, 13vw, 12.5rem); z-index: 3; }
+  .scene .phone { z-index: 2; }
+  .hero__title { position: absolute; z-index: 4; right: clamp(1.5rem, 4.5vw, 5rem); bottom: clamp(2.5rem, 9vh, 6rem); text-align: right; }
+  .hero__title .sc-display { font-size: var(--sc-t-3xl); }
+  .hero__title .sc-body { margin: var(--sc-4) 0 0 auto; max-width: 22ch; color: var(--sc-ink-soft); }
+  .hero__scrim { position: absolute; inset: auto 0 0 0; height: 46%; z-index: 3; pointer-events: none;
+    background: linear-gradient(to top, color-mix(in oklab, var(--lucid) 92%, transparent) 10%, transparent); }
+
+  /* ---------------------------------------------------------- the names -- */
+  .names .half { padding-block: var(--sc-section); }
+  .names .sc-display { font-size: var(--sc-t-2xl); max-width: 16ch; }
+  .names q { quotes: "“" "”"; color: var(--sc-ink); font-family: var(--sc-font-mono); font-size: .86em; }
+
+  /* ------------------------------------------------------------ the peak -- */
+  .peak .half--l { justify-content: center; }
+  .peak .sc-display { font-size: var(--sc-t-2xl); margin-bottom: var(--sc-7); }
+  .clean { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sc-3); }
+  .clean li { position: relative; display: grid; min-height: 3.6em; padding-block: var(--sc-2); border-top: 1px solid color-mix(in oklab, var(--sc-ink) 8%, transparent); }
+  .clean .raw, .clean .done { grid-area: 1 / 1; align-self: center; will-change: transform, opacity; }
+  .clean .raw { font-family: var(--sc-font-mono); font-size: clamp(0.76rem, 0.58rem + 0.42vw, 0.98rem); color: #d9d6dc; overflow-wrap: anywhere; }
+  .clean .done { opacity: 0; display: flex; flex-direction: column; }
+  .clean .done b { font-weight: 600; font-size: var(--sc-t-lg); letter-spacing: var(--sc-track-snug); color: var(--sc-ink); }
+  .clean .done span { font-size: var(--sc-t-sm); color: var(--folder-ink-soft); }
+  .junk { position: relative; display: inline-block; white-space: pre; will-change: transform, opacity; }
+  .junk.is-hot { color: var(--sc-accent); }
+  .junk i { position: absolute; left: 0; right: 0; top: 52%; height: 2px; border-radius: 1px; background: var(--sc-accent); transform-origin: left; transform: scaleX(0); }
+  .peak .half--r { align-items: center; }
+  .peak .phone .screen > :is(img, video) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .peak__cap { margin-top: var(--sc-5); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); text-align: center; }
+
+  /* -------------------------------------------------------- what's absent -- */
+  .absent .half { padding-block: var(--sc-section); }
+  .asks { list-style: none; margin: 0; padding: 0; font-size: var(--sc-t-xl); font-weight: 500; letter-spacing: var(--sc-track-snug); line-height: 1.25; }
+  .asks li { position: relative; width: fit-content; padding-block: var(--sc-2); color: #d9d6dc; }
+  .asks .x { position: absolute; left: -2%; right: -2%; top: 54%; height: 3px; background: var(--sc-accent); border-radius: 2px; }
+  .absent .half--r { align-items: flex-start; }
+  .absent__row { display: flex; gap: clamp(1.5rem, 3vw, 3rem); align-items: center; }
+  .absent .phone { height: min(56svh, 34rem); }
+  .absent .sc-display { font-size: var(--sc-t-2xl); max-width: 11ch; }
+  .absent .sc-body { margin-top: var(--sc-4); max-width: 30ch; }
+
+  /* ---------------------------------------------------------------- try -- */
+  .try .half { padding-block: var(--sc-section); }
+  .try .sc-display { font-size: var(--sc-t-2xl); max-width: 15ch; margin-bottom: var(--sc-6); }
+  .field { display: grid; gap: var(--sc-2); margin-bottom: var(--sc-5); }
+  .field label { font-size: var(--sc-t-sm); color: var(--folder-ink-soft); }
+  .field input {
+    width: 100%; padding: 0.85rem 1rem; border-radius: var(--sc-r-md); border: 1px solid var(--sc-hairline-strong);
+    background: #0f0f11; font-family: var(--sc-font-mono); font-size: clamp(0.85rem, 0.75rem + 0.3vw, 1rem);
+    transition: border-color var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .field input:focus-visible { border-color: var(--sc-accent); outline-offset: 2px; }
+  .examples { display: flex; flex-wrap: wrap; gap: var(--sc-2); }
+  .examples button {
+    padding: 0.45rem 0.8rem; border-radius: var(--sc-r-md); border: 1px solid var(--sc-hairline-strong); background: transparent;
+    font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); color: var(--folder-ink-soft); cursor: pointer;
+    transition: background-color var(--sc-d-fast) var(--sc-ease-out), color var(--sc-d-fast) var(--sc-ease-out), transform 120ms var(--sc-ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) { .examples button:hover { background: rgba(255,255,255,.06); color: var(--sc-ink); } }
+  .examples button:active { transform: scale(0.97); }
+  .try .half--r { align-items: flex-start; }
+  .result {
+    width: min(100%, 30rem); padding: var(--sc-6); border-radius: var(--sc-r-lg); background: var(--sc-surface);
+    box-shadow: var(--sc-e2), var(--sc-edge); display: grid; grid-template-columns: auto 1fr; gap: var(--sc-5); align-items: center;
+  }
+  .result img { width: 5.5rem; height: 5.5rem; border-radius: 10px; object-fit: cover; }
+  .result__t { font-size: var(--sc-t-xl); font-weight: 600; letter-spacing: var(--sc-track-snug); line-height: 1.15; overflow-wrap: anywhere; }
+  .result__a { color: var(--sc-ink-soft); margin-top: var(--sc-1); overflow-wrap: anywhere; }
+  .try__note { margin-top: var(--sc-5); font-size: var(--sc-t-sm); color: var(--sc-ink-soft); max-width: 34ch; }
+
+  /* -------------------------------------------------------------- close -- */
+  .close { position: relative; }
+  .close__l { position: absolute; inset: 0 50% 0 0; background: var(--folder); display: flex; align-items: center; padding: clamp(1.5rem, 4.5vw, 5rem); will-change: transform, opacity; }
+  .close__l p { font-family: var(--sc-font-mono); font-size: var(--sc-t-sm); color: #8f8f98; line-height: 2; margin: 0; }
+  .close__r { position: absolute; inset: 0; background: var(--lucid); clip-path: inset(0 0 0 50%); will-change: clip-path; }
+  .close__glow { position: absolute; left: 50%; top: 42%; width: 60vmin; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--sc-accent) 34%, transparent), transparent); opacity: .5; }
+  .close__inner { position: absolute; left: 75%; top: 46%; translate: -50% -50%; width: min(36rem, 42vw); text-align: center; will-change: transform; }
+  .close__inner img { width: clamp(5.5rem, 9vw, 8rem); height: auto; margin: 0 auto var(--sc-6); border-radius: 22.5%; box-shadow: var(--sc-e3); }
+  .close__inner .sc-display { font-size: var(--sc-t-3xl); }
+  .close__inner .sc-body { margin: var(--sc-4) auto 0; color: var(--sc-ink-soft); }
+  /* Apple's official badge, unaltered (App Store marketing guidelines). */
+  .badge { display: inline-block; margin-top: var(--sc-6); }
+  .badge img { display: block; height: 3.25rem; width: auto; }
+  .foot { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--sc-5) clamp(1.5rem, 4.5vw, 5rem); display: flex; justify-content: space-between; gap: var(--sc-4);
+    font-size: var(--sc-t-xs); color: var(--sc-ink-soft); will-change: transform; }
+  .foot a { color: var(--sc-ink); }
+
+  /* -------------------------------------------------------------- phone -- */
+  @media (max-width: 859px) {
+    body { background: var(--lucid); }
+    .divider { display: none; }
+    .split { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .half { padding: var(--sc-7) var(--sc-5); }
+    .hero .split, .peak .split { grid-template-rows: auto 1fr; }
+    .hero .half--l { padding-top: calc(var(--sc-7) + env(safe-area-inset-top)); justify-content: flex-start; }
+    .hero .files li:nth-child(n+4) { display: none; }
+    .hero__lead .sc-display { font-size: var(--sc-t-xl); margin-bottom: var(--sc-4); }
+    .hero .half--r { padding: 0; }
+    .phone { height: 40svh; border-radius: 1.8rem; padding: .4rem; }
+    .phone > .screen { border-radius: 1.45rem; }
+    .scene__cover { width: 5.5rem; }
+    .scene__cover--near { width: 6rem; left: auto; right: 7%; bottom: 30%; }
+    .scene__cover--a { top: 8%; }
+    .hero__title { left: var(--sc-5); right: var(--sc-5); bottom: var(--sc-5); text-align: left; }
+    .hero__title .sc-display { font-size: var(--sc-t-2xl); }
+    .hero__title .sc-body { margin-left: 0; }
+    .peak .half--l { padding-top: calc(var(--sc-6) + env(safe-area-inset-top)); padding-bottom: var(--sc-4); }
+    .peak .sc-display { font-size: var(--sc-t-xl); margin-bottom: var(--sc-4); }
+    .peak .clean li:nth-child(n+4) { display: none; }
+    .peak .clean li { min-height: 3em; }
+    .peak .half--r { padding: var(--sc-3) 0 var(--sc-4); }
+    .peak .phone { height: 46svh; }
+    .absent__row { flex-direction: column; align-items: flex-start; }
+    .close__l { inset: 0 0 50% 0; align-items: flex-start; padding-top: calc(var(--sc-7) + env(safe-area-inset-top)); }
+    .close__r { clip-path: inset(50% 0 0 0); }
+    .close__inner { left: 50%; top: 50%; width: calc(100% - 2.5rem); }
+    .foot { left: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clean .raw { opacity: .55; }
+    .clean .done { opacity: 1; position: relative; }
+    .clean li { grid-template-rows: auto auto; }
+    .clean .done { grid-area: 2 / 1; }
+    .junk i { transform: none; }
+  }
+</style>
 </head>
-<body class="min-h-screen font-sans text-white/90 antialiased">
-  <div class="orb" style="width:520px;height:520px;top:-180px;left:-160px;background:#FA5C7A"></div>
-  <div class="orb" style="width:460px;height:460px;top:-120px;right:-180px;background:#6E7BFF"></div>
-  <div class="orb" style="width:420px;height:420px;bottom:-200px;left:30%;background:#8A4DFF;opacity:.18"></div>
+<body>
 
-  <!-- ===================================================================
-       CONFIG – only edit these two values (used everywhere on the page)
-       =================================================================== -->
-  <script>
-    const CONFIG = {
-      appName: 'Lucid',
-      email: 'lucid.app.support@proton.me',
-      lastUpdated: '2026-10-03',
-    };
-  </script>
+<span data-sc-progress></span>
+<div class="sc-grain" aria-hidden="true"></div>
 
-  <!-- Navigation -->
-  <header class="sticky top-0 z-20 px-4 pt-4">
-    <nav class="glass mx-auto flex max-w-4xl items-center justify-between rounded-2xl px-4 py-3 shadow-2xl shadow-black/40">
-      <a href="#top" class="flex items-center gap-3">
-        <img src="icon.png" alt="" width="36" height="36" class="app-icon h-9 w-9 shadow-lg shadow-black/40" />
-        <span class="font-semibold tracking-tight" data-app-name></span>
-      </a>
-      <div class="flex items-center gap-1 text-sm">
-        <a href="#support" class="rounded-lg px-3 py-1.5 text-white/70 transition hover:bg-white/10 hover:text-white">Support</a>
-        <a href="#privacy" class="rounded-lg px-3 py-1.5 text-white/70 transition hover:bg-white/10 hover:text-white">
-          <span lang="de">Datenschutz</span><span lang="en">Privacy</span>
-        </a>
-        <button id="lang" class="ml-1 rounded-lg border border-white/15 px-2.5 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/10" aria-label="Switch language">EN</button>
-      </div>
-    </nav>
-  </header>
+<div class="divider" aria-hidden="true">
+  <div class="divider__line"></div>
+  <div class="divider__dot"></div>
+  <div class="divider__labels"><span>Your folder</span><span>Lucid</span></div>
+  <p class="divider__cta"><b>Lucid for iPhone.</b> Available on the App Store</p>
+</div>
 
-  <main id="top" class="relative z-10 mx-auto max-w-4xl px-4 pb-24">
-    <!-- Hero -->
-    <section class="pb-10 pt-16 text-center sm:pt-24">
-      <img src="icon.png" alt="App icon" width="128" height="128" class="app-icon mx-auto mb-8 h-32 w-32 shadow-2xl shadow-[#0B2A6B]/60" />
-      <h1 class="text-4xl font-bold tracking-tight sm:text-6xl">
-        <span data-app-name></span>
-      </h1>
-      <p class="mx-auto mt-5 max-w-2xl text-lg text-white/60">
-        <span lang="de">Ein modularer Offline-Musikplayer für deine eigene Musik. Ohne Konto, ohne Tracking, ohne Cloud-Zwang.</span>
-        <span lang="en">A modular offline music player for the music you own. No account, no tracking, no cloud required.</span>
-      </p>
-      <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <a href="#support" class="rounded-full bg-accent px-6 py-3 font-semibold text-black transition hover:brightness-110">Support &amp; FAQ</a>
-        <a href="#privacy" class="glass rounded-full px-6 py-3 font-semibold transition hover:bg-white/10">
-          <span lang="de">Datenschutzerklärung</span><span lang="en">Privacy Policy</span>
-        </a>
-      </div>
-    </section>
+<main id="top">
 
-    <!-- Highlights -->
-    <section class="grid gap-4 sm:grid-cols-3">
-      <div class="glass rounded-3xl p-6">
-        <div class="mb-3 text-2xl">📁</div>
-        <h3 class="font-semibold"><span lang="de">Deine Dateien</span><span lang="en">Your files</span></h3>
-        <p class="mt-1 text-sm text-white/60">
-          <span lang="de">MP3, M4A, FLAC, WAV … direkt aus der Dateien-App importieren.</span>
-          <span lang="en">Import MP3, M4A, FLAC, WAV … straight from the Files app.</span>
-        </p>
-      </div>
-      <div class="glass rounded-3xl p-6">
-        <div class="mb-3 text-2xl">🔒</div>
-        <h3 class="font-semibold"><span lang="de">100 % lokal</span><span lang="en">100% local</span></h3>
-        <p class="mt-1 text-sm text-white/60">
-          <span lang="de">Alles bleibt auf deinem iPhone. Kein Tracking, keine Analyse.</span>
-          <span lang="en">Everything stays on your iPhone. No tracking, no analytics.</span>
-        </p>
-      </div>
-      <div class="glass rounded-3xl p-6">
-        <div class="mb-3 text-2xl">🎧</div>
-        <h3 class="font-semibold"><span lang="de">Playlists &amp; Songtexte</span><span lang="en">Playlists &amp; lyrics</span></h3>
-        <p class="mt-1 text-sm text-white/60">
-          <span lang="de">Eigene Playlists, Crossfade und synchronisierte Songtexte aus .lrc-Dateien.</span>
-          <span lang="en">Your own playlists, crossfade and synced lyrics from .lrc files.</span>
-        </p>
-      </div>
-    </section>
-
-    <!-- ============================ SUPPORT ============================ -->
-    <section id="support" class="scroll-mt-28 pt-20">
-      <h2 class="text-3xl font-bold tracking-tight">Support &amp; FAQ</h2>
-      <p class="mt-2 text-white/60">
-        <span lang="de">Die häufigsten Fragen – kurz beantwortet.</span>
-        <span lang="en">The most common questions – answered.</span>
-      </p>
-
-      <div class="mt-8 space-y-3">
-        <details class="glass group rounded-2xl p-5" open>
-          <summary class="flex items-center justify-between font-semibold">
-            <span lang="de">Was ist <span data-app-name></span>?</span>
-            <span lang="en">What is <span data-app-name></span>?</span>
-            <span class="chev text-white/40 transition">›</span>
-          </summary>
-          <p class="mt-3 text-white/70">
-            <span lang="de">Ein modularer Offline-Player für deine eigenen Audio-Dateien – mit Playlists, Songtexten, Crossfade und Hörstatistiken. Die App funktioniert vollständig ohne Internet. Sie bringt keine Musik und keine Online-Dienste mit.</span>
-            <span lang="en">A modular offline player for your own audio files – with playlists, lyrics, crossfade and listening stats. The app works entirely without internet. It ships with no music and no online services.</span>
-          </p>
-        </details>
-
-        <details class="glass rounded-2xl p-5">
-          <summary class="flex items-center justify-between font-semibold">
-            <span lang="de">Wie füge ich Musik hinzu?</span>
-            <span lang="en">How do I add music?</span>
-            <span class="chev text-white/40 transition">›</span>
-          </summary>
-          <ol class="mt-3 list-decimal space-y-1 pl-5 text-white/70">
-            <li><span lang="de">Lege deine Audio-Dateien (z. B. MP3, M4A, FLAC, WAV) in die Dateien-App – auf dem iPhone, in iCloud Drive oder einem anderen Speicherort.</span><span lang="en">Put your audio files (e.g. MP3, M4A, FLAC, WAV) into the Files app – on your iPhone, in iCloud Drive or another location.</span></li>
-            <li><span lang="de">Tippe in der leeren Mediathek auf „Audio-Dateien importieren“ – oder in den Einstellungen auf „Musik importieren“.</span><span lang="en">Tap “Import Audio Files” in the empty library – or “Import Music” in Settings.</span></li>
-            <li><span lang="de">Wähle Dateien oder einen ganzen Ordner aus. Titel, Künstler und eingebettete Cover werden automatisch gelesen.</span><span lang="en">Pick files or a whole folder. Title, artist and embedded artwork are read automatically.</span></li>
-          </ol>
-        </details>
-
-        <details class="glass rounded-2xl p-5">
-          <summary class="flex items-center justify-between font-semibold">
-            <span lang="de">Funktioniert die App ohne Internet?</span>
-            <span lang="en">Does the app work offline?</span>
-            <span class="chev text-white/40 transition">›</span>
-          </summary>
-          <p class="mt-3 text-white/70">
-            <span lang="de">Ja. Die App braucht keine Internetverbindung. Musik, Cover, Songtexte, Playlists und Statistiken liegen vollständig auf deinem iPhone.</span>
-            <span lang="en">Yes. The app needs no internet connection. Music, artwork, lyrics, playlists and stats all live on your iPhone.</span>
-          </p>
-        </details>
-
-        <details class="glass rounded-2xl p-5">
-          <summary class="flex items-center justify-between font-semibold">
-            <span lang="de">Warum fehlen Cover oder Songtexte?</span>
-            <span lang="en">Why is artwork or are lyrics missing?</span>
-            <span class="chev text-white/40 transition">›</span>
-          </summary>
-          <p class="mt-3 text-white/70">
-            <span lang="de">Die App zeigt die Cover, die in deine Dateien eingebettet sind. Du kannst jederzeit eigene Bilder (Fotos/Dateien) oder Songtexte (.lrc/.txt) über „Cover ändern“ bzw. „Songtext ändern“ hinzufügen.</span>
-            <span lang="en">The app shows the artwork embedded in your files. You can always add your own images (Photos/Files) or lyrics (.lrc/.txt) via “Change Artwork” or “Change Lyrics”.</span>
-          </p>
-        </details>
-
-        <details class="glass rounded-2xl p-5">
-          <summary class="flex items-center justify-between font-semibold">
-            <span lang="de">Wie lösche ich meine Daten?</span>
-            <span lang="en">How do I delete my data?</span>
-            <span class="chev text-white/40 transition">›</span>
-          </summary>
-          <p class="mt-3 text-white/70">
-            <span lang="de">Alle Daten liegen ausschließlich auf deinem Gerät. Einzelne Songs, Cover und Songtexte kannst du in der App löschen (Einstellungen → Speicher). Wenn du die App deinstallierst, werden alle Daten vollständig entfernt.</span>
-            <span lang="en">All data is stored only on your device. You can delete individual songs, artwork and lyrics in the app (Settings → Storage). Uninstalling the app removes all data completely.</span>
-          </p>
-        </details>
-      </div>
-
-      <!-- Contact -->
-      <div class="glass mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl p-6 sm:flex-row sm:items-center">
-        <div>
-          <h3 class="text-lg font-semibold"><span lang="de">Fehler gefunden oder technische Probleme?</span><span lang="en">Found a bug or experiencing technical issues?</span></h3>
-          <p class="text-white/60"><span lang="de">Melde es hier – bitte nur für Fehlermeldungen und kritische technische Probleme.</span><span lang="en">Report it here – for bug reports and critical technical issues only.</span></p>
+  <!-- 1 · RECOGNITION: pin + layered planes. Both sides readable on landing. -->
+  <section class="hero" data-sc-act="pin" data-sc-span="1.5">
+    <div data-sc-stage>
+      <div class="split">
+        <div class="half half--l">
+          <div class="hero__ghost" data-sc-parallax="-1.2" aria-hidden="true">
+            12 - track 12.mp3<br>untitled (2).m4a<br>AUD-20190413-WA0007.mp3<br>01 Intro [FREE DOWNLOAD].mp3<br>song_final_FINAL_v3.wav<br>
+            02 - unknown artist - track 02.mp3<br>video_audio_2021-08-02.m4a<br>05_-_-_-_.mp3<br>new recording 14.m4a
+          </div>
+          <div class="hero__lead" data-sc-cue="0 0.82 0 0.12">
+            <p class="sc-display">This is what your music looks like.</p>
+            <ul class="files">
+              <li>03 - nova haze - slow motion summer (official audio) [HQ].mp3<span class="tag">artist: ya</span></li>
+              <li>07 - kairo blue - cassette dreams [unreleased] leaked.mp3<span class="tag">www.free-mp3s.to</span></li>
+              <li>juniper_vale_-_northbound_(lyrics).mp3<span class="tag">unknown</span></li>
+              <li>01. luma - daydream drive (hd).m4a<span class="tag">Track</span></li>
+              <li>Ember &amp; Ash - Ghost Town Radio (Visualizer) 320kbps.mp3<span class="tag">no tag</span></li>
+            </ul>
+          </div>
         </div>
-        <a data-email-link class="rounded-full bg-accent px-6 py-3 font-semibold text-black transition hover:brightness-110">
-          <span data-email></span>
-        </a>
+        <div class="half half--r">
+          <div class="scene">
+            <div class="scene__glow" data-sc-parallax="-1.4" aria-hidden="true"><img src="assets/cover-0.webp" alt=""></div>
+            <div class="scene__cover scene__cover--a" data-sc-parallax="-0.8" aria-hidden="true"><img src="assets/cover-5.webp" alt=""></div>
+            <div class="scene__cover scene__cover--b" data-sc-parallax="-0.6" aria-hidden="true"><img src="assets/cover-3.webp" alt=""></div>
+            <div class="phone"><div class="screen"><img src="assets/shot-songs.webp" width="660" height="1434" alt="Lucid's Songs list on iPhone: Cassette Dreams by Kairo Blue, Coastline by Mira Sol, Daydream Drive by Luma, each with its cover."></div></div>
+            <div class="scene__cover scene__cover--near" data-sc-parallax="0.7" aria-hidden="true"><img src="assets/cover-4.webp" alt=""></div>
+          </div>
+          <div class="hero__scrim" aria-hidden="true"></div>
+          <div class="hero__title" data-sc-cue="0 0.82 0 0.12">
+            <h1 class="sc-display" data-sc-kinetic="lines">This is Lucid.</h1>
+            <p class="sc-body">An offline music player for the files you own.</p>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ============================ PRIVACY ============================ -->
-    <section id="privacy" class="scroll-mt-28 pt-20">
-      <h2 class="text-3xl font-bold tracking-tight">
-        <span lang="de">Datenschutzerklärung</span><span lang="en">Privacy Policy</span>
-      </h2>
-      <p class="mt-2 text-sm text-white/50">
-        <span lang="de">Stand:</span><span lang="en">Last updated:</span> <span data-updated></span>
-      </p>
+  <!-- 2 · IRRITATION: flow. Quiet, text only: the silence before the peak. -->
+  <section class="names" data-sc-act="flow">
+    <div class="split">
+      <div class="half half--l">
+        <div class="sc-stack" data-sc-in data-sc-stagger="70">
+          <h2 class="sc-display">Rips, downloads, old drives.</h2>
+          <p class="sc-body">An artist called <q>ya</q>. Another called <q>unknown</q>. Titles that end in <q>(official audio) [HQ]</q>. Every player shows you exactly that.</p>
+        </div>
+      </div>
+      <div class="half half--r">
+        <div class="sc-stack" data-sc-in data-sc-stagger="70">
+          <h2 class="sc-display">Lucid reads both.</h2>
+          <p class="sc-body">The tags and the file name, together. It keeps what is real and drops the rest, right on your iPhone, the moment you import.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      <!-- TL;DR -->
-      <div class="mt-8 rounded-3xl border border-accent/30 bg-gradient-to-br from-accent/15 to-[#8A4DFF]/10 p-6">
-        <h3 class="text-xl font-semibold">
-          <span lang="de">Kurz gesagt: Wir sammeln keine Daten.</span>
-          <span lang="en">In short: we collect no data.</span>
-        </h3>
-        <ul class="mt-4 grid gap-2 text-white/80 sm:grid-cols-2">
-          <li>✓ <span lang="de">100 % lokale Verarbeitung auf deinem Gerät</span><span lang="en">100% local processing on your device</span></li>
-          <li>✓ <span lang="de">Kein Konto, keine Anmeldung</span><span lang="en">No account, no sign-in</span></li>
-          <li>✓ <span lang="de">Kein Tracking, keine Analyse, keine Werbung</span><span lang="en">No tracking, no analytics, no ads</span></li>
-          <li>✓ <span lang="de">Keine eigenen Server – wir erhalten nichts</span><span lang="en">No servers of our own – we receive nothing</span></li>
+  <!-- 3 · RELIEF (PEAK): scrub. The longest act. Left lines clean themselves
+       with the app's own logic while the real recording imports on the right. -->
+  <section class="peak" data-sc-act="scrub" data-sc-span="3.2" data-sc-dwell="0.18" id="peak">
+    <div data-sc-stage>
+      <div class="split">
+        <div class="half half--l">
+          <h2 class="sc-display" data-sc-cue="0 0.97 0 0.06">Watch it clean up.</h2>
+          <ol class="clean" data-clean aria-label="File names and what Lucid makes of them"></ol>
+        </div>
+        <div class="half half--r">
+          <div class="phone">
+            <div class="screen">
+              <img class="sc-stage__poster" src="assets/flow-poster.webp" alt="">
+              <video data-sc-scrub data-sc-src="assets/flow.mp4" data-sc-src-mobile="assets/flow-m.mp4" muted playsinline
+                     aria-label="Screen recording: importing a folder in Lucid, then the cleaned Songs list and Now Playing."></video>
+            </div>
+          </div>
+          <p class="peak__cap">Real screen recording. Lucid 1.0 on iPhone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · CALM: reveal. What is not there. -->
+  <section class="absent" data-sc-act="flow">
+    <div class="split">
+      <div class="half half--l">
+        <p class="lbl">What players usually ask for</p>
+        <ul class="asks">
+          <li>Create an account<span class="x" data-sc-reveal="right" data-sc-reveal-at="0.22 0.36"></span></li>
+          <li>Choose a subscription<span class="x" data-sc-reveal="right" data-sc-reveal-at="0.28 0.42"></span></li>
+          <li>Stream it from our servers<span class="x" data-sc-reveal="right" data-sc-reveal-at="0.34 0.48"></span></li>
+          <li>Let us track what you play<span class="x" data-sc-reveal="right" data-sc-reveal-at="0.40 0.54"></span></li>
         </ul>
       </div>
-
-      <div class="mt-8 space-y-6 leading-relaxed text-white/75">
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">1. <span lang="de">Verantwortlicher</span><span lang="en">Controller</span></h3>
-          <p><span lang="de">Verantwortlich für die App <span data-app-name></span> ist der Entwickler, siehe <a href="#support" class="text-accent underline underline-offset-4">Support</a>.</span><span lang="en">The app <span data-app-name></span> is provided by its developer, see <a href="#support" class="text-accent underline underline-offset-4">Support</a>.</span></p>
-        </article>
-
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">2. <span lang="de">Keine Datenerhebung durch uns</span><span lang="en">No data collection by us</span></h3>
-          <p><span lang="de">Die App arbeitet vollständig lokal. Wir betreiben keine Server für die App und erhalten, speichern oder verarbeiten keinerlei personenbezogene Daten. Die App stellt keine Verbindungen ins Internet her. Es sind keine Analyse-, Tracking- oder Werbe-Dienste (SDKs) eingebunden. Die App verfolgt dich weder app- noch webseitenübergreifend.</span><span lang="en">The app works entirely locally. We operate no servers for the app and do not receive, store or process any personal data. The app makes no internet connections. No analytics, tracking or advertising services (SDKs) are included. The app does not track you across apps or websites.</span></p>
-        </article>
-
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">3. <span lang="de">Daten auf deinem Gerät</span><span lang="en">Data on your device</span></h3>
-          <p><span lang="de">Folgende Daten werden ausschließlich lokal auf deinem iPhone gespeichert und verlassen es nicht:</span><span lang="en">The following data is stored only locally on your iPhone and never leaves it:</span></p>
-          <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li><span lang="de">Importierte Audio-Dateien, Cover-Bilder und Songtexte</span><span lang="en">Imported audio files, artwork and lyrics</span></li>
-            <li><span lang="de">Mediathek, Playlists und Einstellungen (lokale Datenbank)</span><span lang="en">Library, playlists and settings (local database)</span></li>
-            <li><span lang="de">Hörstatistiken (z. B. Wiedergabezeit) – nur für die Anzeige in der App</span><span lang="en">Listening stats (e.g. play time) – only for display in the app</span></li>
-          </ul>
-          <p class="mt-2"><span lang="de">Durch Löschen der App werden alle diese Daten entfernt.</span><span lang="en">Deleting the app removes all of this data.</span></p>
-        </article>
-
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">4. <span lang="de">Berechtigungen</span><span lang="en">Permissions</span></h3>
-          <ul class="list-disc space-y-1 pl-5">
-            <li><strong><span lang="de">Fotos:</span><span lang="en">Photos:</span></strong> <span lang="de">nur für Bilder, die du selbst auswählst (eigene Cover, Künstler- oder Playlist-Bilder).</span><span lang="en">only for images you pick yourself (custom artwork, artist or playlist images).</span></li>
-            <li><strong><span lang="de">Dateien:</span><span lang="en">Files:</span></strong> <span lang="de">nur für Dateien und Ordner, die du im System-Dialog auswählst.</span><span lang="en">only for files and folders you choose in the system picker.</span></li>
-          </ul>
-          <p class="mt-2"><span lang="de">Mikrofon, Kamera, Standort und Kontakte werden nicht verwendet.</span><span lang="en">Microphone, camera, location and contacts are not used.</span></p>
-        </article>
-
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">5. <span lang="de">Kinder</span><span lang="en">Children</span></h3>
-          <p><span lang="de">Da wir keine Daten erheben, werden auch keine Daten von Kindern erhoben.</span><span lang="en">As we collect no data, we also collect no data from children.</span></p>
-        </article>
-
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">6. <span lang="de">Deine Rechte</span><span lang="en">Your rights</span></h3>
-          <p><span lang="de">Da wir keine personenbezogenen Daten verarbeiten, liegen uns keine Daten über dich vor, die wir beauskunften, berichtigen oder löschen könnten.</span><span lang="en">As we process no personal data, we hold no data about you that could be disclosed, corrected or deleted.</span></p>
-        </article>
-
-        <article class="glass rounded-3xl p-6">
-          <h3 class="mb-2 text-lg font-semibold text-white">7. <span lang="de">Änderungen</span><span lang="en">Changes</span></h3>
-          <p><span lang="de">Ändert sich die Funktionsweise der App, passen wir diese Erklärung an. Das Datum oben zeigt die aktuelle Fassung.</span><span lang="en">If the way the app works changes, we will update this policy. The date above shows the current version.</span></p>
-        </article>
+      <div class="half half--r">
+        <div class="absent__row">
+          <figure class="phone" data-sc-reveal="up" data-sc-reveal-at="0.12 0.42" style="margin:0">
+            <div class="screen"><img src="assets/shot-player.webp" width="660" height="1434" alt="Lucid's Now Playing screen: Golden Hour by Nova Haze, with cover, seek bar and controls."></div>
+          </figure>
+          <div class="sc-stack" data-sc-in data-sc-stagger="70">
+            <h2 class="sc-display">None of that.</h2>
+            <p class="sc-body">No account, no subscription, no tracking, no servers. Your files are copied to your iPhone and play without internet.</p>
+          </div>
+        </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <footer class="relative z-10 border-t border-white/10 py-8 text-center text-sm text-white/40">
-    © <span id="year"></span> <span data-app-name></span> ·
-    <a href="#support" class="hover:text-white/70">Support</a> ·
-    <a href="#privacy" class="hover:text-white/70"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></a>
-  </footer>
+  <!-- 5 · PLAY: flow + tilt. The same logic, on their own file name. -->
+  <section class="try" data-sc-act="flow" id="try">
+    <div class="split">
+      <div class="half half--l">
+        <h2 class="sc-display">Try your worst file name.</h2>
+        <div class="field">
+          <label for="fname">File name</label>
+          <input id="fname" type="text" spellcheck="false" autocomplete="off" value="02 - dj sunny - midnight drive (official video) [4K] leaked.mp3">
+        </div>
+        <div class="field">
+          <label for="ftag">Artist tag in the file (optional)</label>
+          <input id="ftag" type="text" spellcheck="false" autocomplete="off" value="ya">
+        </div>
+        <div class="examples" aria-label="Examples">
+          <button type="button" data-ex="01. the low hums - paper planes (lyrics).mp3|unknown">lyrics</button>
+          <button type="button" data-ex="the_low_hums_-_paper_planes_hq.mp3|">underscores</button>
+          <button type="button" data-ex="12 - Sunday Drive.flac|The Low Hums">good tags</button>
+        </div>
+      </div>
+      <div class="half half--r">
+        <div class="result" data-sc-tilt="6" aria-live="polite">
+          <img src="assets/cover-6.webp" width="640" height="640" alt="">
+          <div>
+            <div class="result__t" id="rtitle">Midnight Drive</div>
+            <div class="result__a" id="rartist">Dj Sunny</div>
+          </div>
+        </div>
+        <p class="try__note">This runs the same clean-up code as the app, in your browser. Nothing you type is sent anywhere.</p>
+      </div>
+    </div>
+  </section>
 
-  <script>
-    // Fill in app name, e-mail and date from CONFIG.
-    document.querySelectorAll('[data-app-name]').forEach((el) => (el.textContent = CONFIG.appName));
-    document.querySelectorAll('[data-email]').forEach((el) => (el.textContent = CONFIG.email));
-    document.querySelectorAll('[data-email-link]').forEach((el) => (el.href = 'mailto:' + CONFIG.email));
-    document.querySelectorAll('[data-updated]').forEach((el) => (el.textContent = CONFIG.lastUpdated));
-    document.getElementById('year').textContent = new Date().getFullYear();
-    document.title = CONFIG.appName + ' – Support & Privacy';
+  <!-- 6 · RESOLVE: pin. The divider gives up; the clean side takes the screen. -->
+  <section class="close" id="get" data-sc-act="pin" data-sc-span="1.4">
+    <div data-sc-stage>
+      <div class="close__l" aria-hidden="true"><p>03 - nova haze - slow motion summer (official audio) [HQ].mp3<br>07 - kairo blue - cassette dreams [unreleased] leaked.mp3<br>juniper_vale_-_northbound_(lyrics).mp3</p></div>
+      <div class="close__r">
+        <div class="close__glow" aria-hidden="true"></div>
+        <div class="close__inner" data-sc-cue="0.0 1 0 0">
+          <img src="assets/icon-v3.png" width="256" height="256" alt="Lucid app icon">
+          <h2 class="sc-display">Your music, in order.</h2>
+          <p class="sc-body">Lucid for iPhone. Offline, no account, no tracking.</p>
+          <a class="badge" href="https://apps.apple.com/app/lucid-local-audio-player/id6818787157"><img src="assets/app-store-badge.svg" width="540" height="160" alt="Download on the App Store"></a>
+        </div>
+        <footer class="foot">
+          <span>© 2026 Lucid</span>
+          <a href="support.html">Support &amp; privacy</a>
+        </footer>
+      </div>
+    </div>
+  </section>
 
-    // Language: ?lang=en / ?lang=de, else the browser language (German or English).
-    const root = document.documentElement;
-    const btn = document.getElementById('lang');
-    const setLang = (lang) => {
-      root.dataset.lang = lang;
-      root.lang = lang;
-      btn.textContent = lang === 'de' ? 'EN' : 'DE';
-    };
-    const param = new URLSearchParams(location.search).get('lang');
-    setLang(param === 'en' || param === 'de' ? param : navigator.language.startsWith('de') ? 'de' : 'en');
-    btn.addEventListener('click', () => setLang(root.dataset.lang === 'de' ? 'en' : 'de'));
-  </script>
+</main>
+
+<script src="scrollcraft.js"></script>
+<script src="sanitize.js"></script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const ease = (x) => 1 - Math.pow(1 - x, 3);
+  const prog = (el) => parseFloat(getComputedStyle(el).getPropertyValue('--sc-p')) || 0;
+  const { sanitizeMetadata, junkRanges } = window.LucidClean;
+
+  // ---- signature move: the app's cleaner, run line by line on scroll ------
+  const FILES = [
+    ['03 - nova haze - slow motion summer (official audio) [HQ].mp3', 'ya'],
+    ['07 - kairo blue - cassette dreams [unreleased] leaked.mp3', 'www.free-mp3s.to'],
+    ['juniper_vale_-_northbound_(lyrics).mp3', 'unknown'],
+    ['01. luma - daydream drive (hd).m4a', 'Track'],
+    ['Ember & Ash - Ghost Town Radio (Visualizer) 320kbps.mp3', ''],
+  ];
+  const list = document.querySelector('[data-clean]');
+  const rows = FILES.map(([file, tag]) => {
+    const li = document.createElement('li');
+    const raw = document.createElement('span');
+    raw.className = 'raw';
+    const shown = file.replace(/_/g, ' ');
+    let at = 0;
+    const junk = [];
+    for (const [a, b] of junkRanges(file)) {
+      if (a > at) raw.append(shown.slice(at, a));
+      const j = document.createElement('span');
+      j.className = 'junk';
+      j.textContent = shown.slice(a, b);
+      j.append(document.createElement('i'));
+      raw.append(j);
+      junk.push(j);
+      at = b;
+    }
+    raw.append(shown.slice(at));
+    const r = sanitizeMetadata(null, tag, file);
+    const done = document.createElement('span');
+    done.className = 'done';
+    done.innerHTML = '<b></b><span></span>';
+    done.firstChild.textContent = r.title;
+    done.lastChild.textContent = r.artist;
+    li.append(raw, done);
+    list.append(li);
+    return { raw, done, junk };
+  });
+
+  const peak = document.getElementById('peak');
+  const close = document.getElementById('get');
+  const dot = document.querySelector('.divider__dot');
+  const divider = document.querySelector('.divider');
+  const closeL = close.querySelector('.close__l');
+  const closeR = close.querySelector('.close__r');
+  const closeIn = close.querySelector('.close__inner');
+  const cta = document.querySelector('.divider__cta');
+  const phone = matchMedia('(max-width: 859px)');
+
+  function paintPeak(p) {
+    rows.forEach((row, i) => {
+      const start = 0.10 + i * 0.13;
+      const local = reduce ? 1 : clamp((p - start) / 0.17);
+      const strike = clamp(local / 0.4);
+      const fall = clamp((local - 0.42) / 0.3);
+      const swap = clamp((local - 0.62) / 0.38);
+      row.junk.forEach((j) => {
+        j.classList.toggle('is-hot', strike > 0);
+        j.lastChild.style.transform = `scaleX(${strike})`;
+        if (!reduce) {
+          j.style.opacity = 1 - fall;
+          j.style.transform = `translateY(${ease(fall) * 14}px)`;
+        }
+      });
+      if (!reduce) {
+        row.raw.style.opacity = 1 - swap;
+        row.raw.style.transform = `translateY(${-8 * ease(swap)}px)`;
+        row.done.style.opacity = swap;
+        row.done.style.transform = `translateY(${10 * (1 - ease(swap))}px)`;
+      }
+    });
+  }
+
+  function paintClose(p) {
+    const q = reduce ? 1 : ease(clamp((p - 0.04) / 0.6));
+    if (phone.matches) {
+      closeL.style.transform = `translateY(${-50 * q}%)`;
+      closeL.style.opacity = 1 - q;
+      closeR.style.clipPath = `inset(${50 * (1 - q)}% 0 0 0)`;
+      closeIn.style.transform = `translateY(${18 * (1 - q)}vh)`;
+      return;
+    }
+    closeL.style.transform = `translateX(${-60 * q}%)`;
+    closeL.style.opacity = 1 - q;
+    closeR.style.clipPath = `inset(0 0 0 ${50 * (1 - q)}%)`;
+    closeIn.style.transform = `translateX(${-25 * q}vw)`;
+    divider.style.transform = `translateX(${-50 * q}vw)`;
+    divider.style.opacity = 1 - q;
+  }
+
+  let last = -1;
+  function frame() {
+    const y = scrollY;
+    if (y !== last) {
+      last = y;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      dot.style.transform = `translateY(${clamp(y / max) * (innerHeight - 8)}px)`;
+      paintPeak(prog(peak));
+      paintClose(prog(close));
+      // the divider's CTA line steps aside as the close (which carries the real CTA) arrives
+      const top = close.getBoundingClientRect().top;
+      cta.style.opacity = clamp((top - innerHeight * 0.25) / (innerHeight * 0.45));
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---- try it: same cleaner on the visitor's own input ---------------------
+  const fname = document.getElementById('fname');
+  const ftag = document.getElementById('ftag');
+  const rt = document.getElementById('rtitle');
+  const ra = document.getElementById('rartist');
+  function run() {
+    const name = fname.value.trim();
+    if (!name) { rt.textContent = 'Unknown Title'; ra.textContent = 'Unknown Artist'; return; }
+    const r = sanitizeMetadata(null, ftag.value, name);
+    rt.textContent = r.title;
+    ra.textContent = r.artist;
+  }
+  fname.addEventListener('input', run);
+  ftag.addEventListener('input', run);
+  document.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click', () => {
+    const [n, t] = b.dataset.ex.split('|');
+    fname.value = n;
+    ftag.value = t;
+    run();
+  }));
+
+  ScrollCraft.mount(document.body);
+  run();
+  requestAnimationFrame(frame);
+  phone.addEventListener('change', () => { last = -1; });
+})();
+</script>
 </body>
 </html>

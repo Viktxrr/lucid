@@ -170,12 +170,13 @@
   .close__glow { position: absolute; left: 50%; top: 42%; width: 60vmin; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
     background: radial-gradient(closest-side, color-mix(in oklab, var(--sc-accent) 34%, transparent), transparent); opacity: .5; }
   .close__inner { position: absolute; left: 75%; top: 46%; translate: -50% -50%; width: min(36rem, 42vw); text-align: center; will-change: transform; }
-  .close__inner img { width: clamp(5.5rem, 9vw, 8rem); height: auto; margin: 0 auto var(--sc-6); border-radius: 22.5%; box-shadow: var(--sc-e3); }
+  .close__inner > img { width: clamp(5.5rem, 9vw, 8rem); height: auto; margin: 0 auto var(--sc-6); border-radius: 22.5%; box-shadow: var(--sc-e3); }
   .close__inner .sc-display { font-size: var(--sc-t-3xl); }
   .close__inner .sc-body { margin: var(--sc-4) auto 0; color: var(--sc-ink-soft); }
   /* Apple's official badge, unaltered (App Store marketing guidelines). */
-  .badge { display: inline-block; margin-top: var(--sc-6); }
-  .badge img { display: block; height: 3.25rem; width: auto; }
+  .badge { display: inline-block; margin-top: var(--sc-6); border-radius: 0.6rem; transition: transform .2s, filter .2s; }
+  .badge img { display: block; height: 3.5rem; width: auto; }
+  @media (hover: hover) and (pointer: fine) { .badge:hover { filter: brightness(1.15); transform: translateY(-1px); } }
   .foot { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--sc-5) clamp(1.5rem, 4.5vw, 5rem); display: flex; justify-content: space-between; gap: var(--sc-4);
     font-size: var(--sc-t-xs); color: var(--sc-ink-soft); will-change: transform; }
   .foot a { color: var(--sc-ink); }

@@ -11,7 +11,7 @@
 No account. No tracking. No streaming.
 
 <a href="https://apps.apple.com/app/lucid-local-audio-player/id6818787157">
-  <img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/en-us" height="48" alt="Download on the App Store" />
+  <img src=".github/assets/app-store-badge.svg" height="48" alt="Download on the App Store" />
 </a>
 
 <br /><br />

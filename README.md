@@ -40,8 +40,8 @@ No account. No tracking. No streaming.
 
 - 🔒 **Private by design** – no account, no analytics, no ads, no network calls in the App Store build. Everything stays on your device.
 - 📂 **Your files, offline** – import MP3, M4A, FLAC, WAV and AIFF from the Files app or iCloud Drive; folders stay in sync.
-- 🎨 **Artwork that just shows up** – embedded covers in every common format, even huge ones.
-- 🎤 **Lyrics like Apple Music** – synced lyrics centred in the upper third, tap a line to jump; import `.lrc` / `.txt` or time them yourself, line by line.
+- 🎨 **Design** – embedded covers in every common format, even huge ones.
+- 🎤 **Lyrics** – synced lyrics centred in the upper third, tap a line to jump; import `.lrc` / `.txt` or time them yourself, line by line.
 - 🔀 **One player, three modes** – Player, Lyrics and Up Next on one screen, with a single artwork gliding between them on a spring.
 - 📋 **Up Next** – tap to play, drag to reorder, swipe to remove – with Undo.
 - 🎚️ **Fine scrubbing** – drag down while scrubbing for half, quarter or fine speed, with a haptic tick per step.

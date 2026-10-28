@@ -81,8 +81,7 @@ No account. No tracking. No streaming.
 Lucid is an indie app: free, no ads, no subscriptions, no data collection.
 If it makes your music feel a little better, you can buy me a coffee:
 
-<!-- TODO: add the tip-jar link -->
-<a href="https://buymeacoffee.com/your-handle">
+<a href="https://buymeacoffee.com/viktxrr">
   <img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-6C6AC9?style=for-the-badge&logo=buymeacoffee&logoColor=white" alt="Buy me a coffee" />
 </a>
 
